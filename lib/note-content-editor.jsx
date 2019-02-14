@@ -88,6 +88,7 @@ export default class NoteContentEditor extends Component {
       this.props.content.text,
       this.props.filter
     ),
+    lang: undefined,
   };
 
   editorKey = 0;
@@ -161,6 +162,21 @@ export default class NoteContentEditor extends Component {
     if (spellCheckEnabled !== prevProps.spellCheckEnabled) {
       this.editorKey += 1;
       this.forceUpdate();
+    }
+
+    // Update language related settings when another note is selected
+    // (Only relevant when running in Electron)
+    if (noteId !== prevProps.noteId) {
+      if (window.spellCheckHandler) {
+        // Auto-detect the note content language to switch spellchecker
+        window.spellCheckHandler.provideHintText(content.text).then(() => {
+          // Use the auto-detected language to set a `lang` attribute on the
+          // note, which helps Chromium in Electron pick an appropriate font
+          this.setState({
+            lang: window.spellCheckHandler.currentSpellcheckerLanguage,
+          });
+        });
+      }
     }
 
     // If another note/revision is selected,
@@ -298,6 +314,7 @@ export default class NoteContentEditor extends Component {
   render() {
     return (
       <div
+        lang={this.state.lang}
         onCopy={this.copyPlainText}
         onCut={this.copyPlainText}
         style={{ height: '100%' }}
