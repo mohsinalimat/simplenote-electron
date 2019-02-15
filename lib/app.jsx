@@ -70,6 +70,7 @@ function mapDispatchToProps(dispatch, { noteBucket }) {
         'setAccountName',
         'toggleAutoHideMenuBar',
         'toggleFocusMode',
+        'toggleLanguageDetection',
         'toggleSpellCheck',
       ]),
       dispatch

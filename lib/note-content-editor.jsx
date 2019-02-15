@@ -34,6 +34,7 @@ export default class NoteContentEditor extends Component {
       text: PropTypes.string.isRequired,
       hasRemoteUpdate: PropTypes.bool.isRequired,
     }),
+    detectLanguage: PropTypes.bool.isRequired,
     filter: PropTypes.string.isRequired,
     noteId: PropTypes.string,
     onChangeContent: PropTypes.func.isRequired,
@@ -152,9 +153,29 @@ export default class NoteContentEditor extends Component {
   };
 
   componentDidUpdate(prevProps) {
-    const { content, filter, noteId, spellCheckEnabled } = this.props;
+    const {
+      content,
+      detectLanguage,
+      filter,
+      noteId,
+      spellCheckEnabled,
+    } = this.props;
+
     const { editorState } = this.state;
 
+    const setAutoDetectedLanguage = () => {
+      // Auto-detect the note content language to switch spellchecker
+      window.spellCheckHandler.provideHintText(content.text).then(() => {
+        // Use the auto-detected language to set a `lang` attribute on the
+        // note, which helps Chromium in Electron pick an appropriate font
+        this.setState({
+          lang: window.spellCheckHandler.currentSpellcheckerLanguage,
+        });
+      });
+    };
+
+    // Only relevant in Electron
+    if (window.spellCheckHandler) {
     // To immediately reflect the changes to the spell check setting,
     // we must remount the Editor and force update. The remount is
     // done by changing the `key` prop on the Editor.
@@ -165,17 +186,17 @@ export default class NoteContentEditor extends Component {
     }
 
     // Update language related settings when another note is selected
-    // (Only relevant when running in Electron)
-    if (noteId !== prevProps.noteId) {
-      if (window.spellCheckHandler) {
-        // Auto-detect the note content language to switch spellchecker
-        window.spellCheckHandler.provideHintText(content.text).then(() => {
-          // Use the auto-detected language to set a `lang` attribute on the
-          // note, which helps Chromium in Electron pick an appropriate font
-          this.setState({
-            lang: window.spellCheckHandler.currentSpellcheckerLanguage,
-          });
-        });
+      if (noteId !== prevProps.noteId && detectLanguage) {
+        setAutoDetectedLanguage();
+      }
+
+      if (detectLanguage !== prevProps.detectLanguage) {
+        if (detectLanguage) {
+          setAutoDetectedLanguage();
+        } else {
+          window.spellCheckHandler.switchLanguage(navigator.language);
+          this.setState({ lang: undefined });
+        }
       }
     }
 

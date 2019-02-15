@@ -50,6 +50,12 @@ const buildEditMenu = settings => {
         checked: settings.spellCheckEnabled,
         click: appCommandSender({ action: 'toggleSpellCheck' }),
       },
+      {
+        label: '&Auto-Detect Language',
+        type: 'checkbox',
+        checked: settings.languageDetectionEnabled,
+        click: appCommandSender({ action: 'toggleLanguageDetection' }),
+      },
     ],
   };
 };
