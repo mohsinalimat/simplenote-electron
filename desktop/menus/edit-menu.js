@@ -1,3 +1,4 @@
+const platform = require('../detect/platform');
 const { appCommandSender } = require('./utils');
 
 const buildEditMenu = settings => {
@@ -55,6 +56,7 @@ const buildEditMenu = settings => {
         type: 'checkbox',
         checked: settings.languageDetectionEnabled,
         click: appCommandSender({ action: 'toggleLanguageDetection' }),
+        visible: !platform.isOSX(), // currently not working on Mac
       },
     ],
   };
