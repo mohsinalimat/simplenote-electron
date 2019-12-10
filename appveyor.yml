@@ -20,7 +20,6 @@ install:
   - ps: Install-Product node 12
   - cinst make
   - npm ci
-  - patch -p1 < ./resources/macos/scheme-patch.diff
 
 for:
   # default build / .exe / signed
